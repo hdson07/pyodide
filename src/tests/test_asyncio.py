@@ -471,5 +471,5 @@ def test_uncaught_exception(selenium):
     )
 
     assert expected_message in re.sub("line [0-9]+", "line xxx", selenium.logs).replace(
-        str(PYODIDE_ROOT)+"/src", "$PYODIDE_ROOT/src"
+        str(PYODIDE_ROOT) + "/src", "$PYODIDE_ROOT/src"
     )
