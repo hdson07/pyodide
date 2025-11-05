@@ -26,7 +26,7 @@ from .docs_argspec import docs_argspec
 # appropriately.
 
 # Sphinx uses __name__ to determine the paths and such. It looks better for it
-# to refer to e.g., `pyodide.JsProxy` than `_pyodide._core_docs.JsProxy`.
+# to refer to e.g., `pyodide.ffi.JsProxy` than `_pyodide._core_docs.JsProxy`.
 #
 # Use an empty name for the module of the type variables to prevent long
 # qualified names for the type variables from appearing in the docs.
@@ -227,6 +227,10 @@ class JsProxy(metaclass=_JsProxyMetaClass):
         over the object and counts how many :js:func:`~Reflect.ownKeys` it has).
         If you need to compute the length in O(1) time, use a real
         :js:class:`Map` instead.
+
+        .. deprecated:: 0.29.0
+
+            Use :py:meth:`JsProxy.as_py_json` instead.
 
         Parameters
         ----------
@@ -1422,10 +1426,10 @@ class ToJsConverter(Protocol):
 
     def __call__(
         self,
-        /,
         value: Any,
         converter: Callable[[Any], JsProxy],
         cache: Callable[[Any, JsProxy], None],
+        /,
     ) -> JsProxy: ...
 
 
@@ -1518,9 +1522,9 @@ def to_js(
         (JavaScript) pairs [key, value]. It is expected to return the desired
         result of the dict conversion. Some suggested values for this argument:
 
-          * ``js.Map.new`` -- similar to the default behavior
+          * ``js.Object.fromEntries`` -- similar to the default behavior
+          * ``js.Map.new`` -- convert to a map
           * ``js.Array.from`` -- convert to an array of entries
-          * ``js.Object.fromEntries`` -- convert to a JavaScript object
 
     default_converter:
         If present will be invoked whenever Pyodide does not have some built in
@@ -1543,40 +1547,32 @@ def to_js(
 
     Examples
     --------
-    >>> from js import Object, Map, Array # doctest: +SKIP
-    >>> from pyodide.ffi import to_js # doctest: +SKIP
-    >>> js_object = to_js({'age': 20, 'name': 'john'}) # doctest: +SKIP
-    >>> js_object # doctest: +SKIP
-    [object Map]
-    >>> js_object.keys(), js_object.values() # doctest: +SKIP
-    KeysView([object Map]) ValuesView([object Map]) # doctest: +SKIP
-    >>> [(k, v) for k, v in zip(js_object.keys(), js_object.values())] # doctest: +SKIP
-    [('age', 20), ('name', 'john')]
-
-    >>> js_object = to_js({'age': 20, 'name': 'john'}, dict_converter=Object.fromEntries) # doctest: +SKIP
-    >>> js_object.age == 20 # doctest: +SKIP
-    True
-    >>> js_object.name == 'john' # doctest: +SKIP
-    True
-    >>> js_object # doctest: +SKIP
+    >>> from js import Object, Map, Array # doctest: +RUN_IN_PYODIDE
+    >>> from pyodide.ffi import to_js
+    >>> js_object = to_js({'age': 20, 'name': 'john'})
+    >>> js_object
     [object Object]
-    >>> js_object.hasOwnProperty("age") # doctest: +SKIP
+    >>> js_object.age == 20
     True
-    >>> js_object.hasOwnProperty("height") # doctest: +SKIP
+    >>> js_object.name == 'john'
+    True
+    >>> js_object.hasOwnProperty("age")
+    True
+    >>> js_object.hasOwnProperty("height")
     False
 
-    >>> js_object = to_js({'age': 20, 'name': 'john'}, dict_converter=Array.from_) # doctest: +SKIP
-    >>> [item for item in js_object] # doctest: +SKIP
+    >>> js_object = to_js({'age': 20, 'name': 'john'}, dict_converter=Array.from_) # doctest: +RUN_IN_PYODIDE
+    >>> [item for item in js_object]
     [age,20, name,john]
-    >>> js_object.toString() # doctest: +SKIP
-    age,20,name,john
+    >>> js_object.toString()
+    'age,20,name,john'
 
-    >>> class Bird: pass # doctest: +SKIP
-    >>> converter = lambda value, convert, cache: Object.new(size=1, color='red') if isinstance(value, Bird) else None # doctest: +SKIP
-    >>> js_nest = to_js([Bird(), Bird()], default_converter=converter) # doctest: +SKIP
-    >>> [bird for bird in js_nest] # doctest: +SKIP
+    >>> class Bird: pass # doctest: +RUN_IN_PYODIDE
+    >>> converter = lambda value, convert, cache: Object.new(size=1, color='red') if isinstance(value, Bird) else None
+    >>> js_nest = to_js([Bird(), Bird()], default_converter=converter)
+    >>> [bird for bird in js_nest]
     [[object Object], [object Object]]
-    >>> [(bird.size, bird.color) for bird in js_nest] # doctest: +SKIP
+    >>> [(bird.size, bird.color) for bird in js_nest]
     [(1, 'red'), (1, 'red')]
 
     Here are some examples demonstrating the usage of the ``default_converter``
@@ -1717,10 +1713,6 @@ def can_run_sync() -> bool:
     raise NotImplementedError
 
 
-__name__ = _save_name
-del _save_name
-
-
 class JsNull:
     """The type of the Python representation of the JavaScript null object"""
 
@@ -1777,3 +1769,6 @@ __all__ = [
     "JsNull",
     "jsnull",
 ]
+
+__name__ = _save_name
+del _save_name

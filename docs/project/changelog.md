@@ -15,7 +15,74 @@ myst:
 
 # Change Log
 
-## Unreleased
+## Version 0.29.0
+
+- {{ Feature }} Added `pyxhr`, a synchronous HTTP client using XMLHttpRequest
+  that provides a requests-like API for making synchronous HTTP requests in
+  browser environments. This includes `XHRResponse` class and support for all
+  common HTTP methods (GET, POST, PUT, DELETE, HEAD, PATCH, OPTIONS).
+  {pr}`5841`
+
+- {{ Feature }} `pyfetch` now works when passed a JS Request object instead of a
+  url. {pr}`5866`
+
+- {{ Breaking }} The default behavior of `toJs()`/`to_js` was changed to convert
+  dictionaries to JavaScript objects. To opt into the old behavior, pass
+  `toJsLiteralMap: true` to `loadPyodide()`. This is deprecated.
+  {pr}`5912`
+
+- {{ Breaking }} Deprecated `JsProxy.as_object_map()`. It will be removed in Pyodide
+  0.31.0. Use `JsProxy.as_js_json()` instead.
+  {pr}`5899`
+
+- {{ Fix }} Fixed a bug where a weird object was used as `this` when there is no
+  relevant `this`. See {issue}`5929`.
+  {pr}`5937`
+
+### Packages
+
+- {{ Enhancement }} New packages added:
+  - bilby.cython (0.5.3)
+  - fastapi (0.116.1)
+  - highspy (1.11.0)
+  - jsonpatch (1.33)
+  - jsonpointer (3.0.0)
+  - pylimer-tools (0.3.11)
+  - python-calamine (0.4.0)
+  - starlette (0.47.2)
+  - vrplib (2.0.1)
+
+## Version 0.28.3
+
+_September 22, 2025_
+
+- {{ Fix }} In 0.28.2 we accidentally disabled a performance optimization that
+  makes the foreign function interface about 5% slower. {pr}`5890`
+
+- {{ Enhancement }} Added ``get_debug``/``set_debug`` methods to webloop. These
+  are methods on ``AbstractEventLoop``. There are currently no differences in
+  behavior when debug mode is set on the event loop. {pr}`5886`
+
+- {{ Enhancement }} The typescript types for `pyodide.FS` are now slightly more
+  complete. {pr}`5863`
+
+## Version 0.28.2
+
+_August 19, 2025_
+
+- {{ Fix }} Fixed a bug where package download and caching did not work in Node.js
+  which was introduced in 0.28.1.
+  {pr}`5824`
+
+- {{ Enhancement }} Improve error message when a dynamic library fails to load.
+  {pr}`5840`
+
+- {{ Fix }} In 0.28.1 we accidentally removed the `PyodideInterface` type
+  export. We added it back. {pr}`5827`
+
+## Version 0.28.1
+
+_August 04, 2025_
 
 ### General
 
@@ -50,6 +117,13 @@ myst:
 
 - {{ Enhancement }} Update typescript types to include `FS.unmount()`.
   {pr}`5788`
+
+### Packages
+
+- {{ Enhancement }} New packages added:
+  - audioop-lts (0.2.1)
+  - cobs (1.2.1)
+  - PyMuPDF (1.26.3)
 
 ## Version 0.28.0
 

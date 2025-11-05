@@ -34,7 +34,7 @@ RUN if [ $CHROME_VERSION = "latest" ]; then SE_CHROME_VERSION="stable"; \
   && mv $(dirname ${SE_CHROME_DRIVER_PATH}) /opt/chromedriver
 
 
-FROM node:20.11-bookworm-slim AS node-image
+FROM node:24.7-bookworm-slim AS node-image
 FROM python:3.13.2-slim-bookworm
 
 RUN apt-get update \
@@ -86,11 +86,9 @@ RUN npm install -g \
 # Normally, it is a bad idea to install rustup and cargo in
 # system directories (it should not be shared between users),
 # but this docker image is only for building packages, so I hope it is ok.
-# Setting RUSTUP_UPDATE_ROOT gives us a beta rustup.
-# TODO: Remove when Rustup 1.28.0 is released.
+ENV RUSTUP_HOME=/usr
+ENV CARGO_HOME=/usr
 RUN wget -q -O  -  https://sh.rustup.rs | \
-  RUSTUP_UPDATE_ROOT=https://dev-static.rust-lang.org/rustup \
-  RUSTUP_HOME=/usr CARGO_HOME=/usr \
   sh -s -- -y --profile minimal --no-modify-path
 
 COPY --from=selenium-manager-image /opt/firefox /opt/firefox

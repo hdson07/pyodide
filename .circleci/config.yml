@@ -6,7 +6,7 @@ defaults: &defaults
     # Note: when updating the docker image version,
     #       make sure there are no extra old versions lying around.
     #       (e.g. `rg -F --hidden <old_tag>`)
-    - image: pyodide/pyodide-env:20250311-chrome134-firefox136-py313
+    - image: pyodide/pyodide-env:20250915-chrome140-firefox140-py313
   environment:
     EMSDK_NUM_CORES: 3
     EMCC_CORES: 3
@@ -80,7 +80,7 @@ jobs:
             source pyodide_env.sh
 
             ccache -z
-            PYODIDE_PACKAGES="tag:pytest,tag:pyodide.test" make
+            PYODIDE_PACKAGES="tag:pytest,tag:pyodide.test" make -j${PYODIDE_JOBS}
             ccache -s
 
       - run:
@@ -351,7 +351,7 @@ jobs:
 
   test-js:
     <<: *defaults
-    resource_class: small
+    resource_class: large
     steps:
       - attach_workspace:
           at: .
@@ -370,6 +370,18 @@ jobs:
             cd src/js
             npm run test:unit
 
+      - run:
+          name: test-node
+          command: |
+            cd src/js
+            npm run test:node
+
+      - run:
+          name: test-browser
+          command: |
+            cd src/js
+            npx playwright install chromium --only-shell --with-deps
+            npm run test:browser
       # - run:
       #     name: check if Pyodide works with Webpack
       #     command: |
@@ -671,7 +683,7 @@ workflows:
 
       - test-main:
           name: test-core-chrome-webworker
-          test-params: --runtime=chrome-no-host src/tests/test_webworker.py
+          test-params: --runtime=chrome-no-host src/tests/test_webworker.py src/tests/test_webloop_webworker.py
           requires:
             - test-core-chrome
           filters:
@@ -680,7 +692,7 @@ workflows:
 
       - test-main:
           name: test-core-firefox-webworker
-          test-params: --runtime=firefox-no-host src/tests/test_webworker.py
+          test-params: --runtime=firefox-no-host src/tests/test_webworker.py src/tests/test_webloop_webworker.py
           requires:
             - test-core-firefox
           filters:

@@ -134,6 +134,7 @@ addopts = '''
 --ignore-glob="src/py/_pyodide/jsbind.py"
 --ignore-glob="packages/**/extras/"
 --ignore-glob="packages/scipy/cmdline_test_file.py"
+--ignore-glob="packages/test-simd/src/test_simd/__init__.py"
 --tb=short
 --dist-dir=dist'''
 testpaths = [
@@ -143,6 +144,7 @@ testpaths = [
 asyncio_mode = "strict"
 markers = [
     "requires_dynamic_linking",
+    "long_running: marks tests as long running (deselect with '-m \"not long_running\"')",
 ]
 
 [tool._pyodide]
